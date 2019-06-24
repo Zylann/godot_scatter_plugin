@@ -12,11 +12,15 @@ var _editor_camera = null
 var _collision_mask = 1
 
 
+static func get_icon(name):
+	return load("res://addons/zylann.scatter/tools/icons/icon_" + name + ".svg")
+
+
 func _enter_tree():
 	print("Scatter plugin Enter tree")
 	# The class is globally named but still need to register it just so the node creation dialog gets it
 	# https://github.com/godotengine/godot/issues/30048
-	add_custom_type("Scatter3D", "Spatial", Scatter3D, null)
+	add_custom_type("Scatter3D", "Spatial", Scatter3D, get_icon("scatter3d_node"))
 
 
 func _exit_tree():
