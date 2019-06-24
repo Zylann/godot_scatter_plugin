@@ -1,0 +1,17 @@
+# Godot
+.import/
+logs/
+default_env.tres
+
+# VSCode
+*.vs/
+
+# Windows
+*.bat
+
+# Misc
+_draft/
+_old/
+tests/
+*.blend
+*.obj
