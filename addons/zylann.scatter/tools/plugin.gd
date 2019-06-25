@@ -3,6 +3,9 @@ extends EditorPlugin
 
 const Scatter3D = preload("res://addons/zylann.scatter/scatter3d.gd")
 
+const ACTION_PAINT = 0
+const ACTION_ERASE = 1
+
 var _node = null
 var _pattern = null
 var _mouse_pressed = false
@@ -10,6 +13,8 @@ var _pending_paint_completed = false
 var _mouse_position = Vector2()
 var _editor_camera = null
 var _collision_mask = 1
+var _placed_instances = []
+var _removed_instances = []
 
 
 static func get_icon(name):
@@ -68,7 +73,7 @@ func forward_spatial_gui_input(p_camera, p_event):
 
 			# Need to check modifiers before capturing the event,
 			# because they are used in navigation schemes
-			if (not mb.control) and (not mb.alt) and mb.button_index == BUTTON_LEFT:
+			if (not mb.control) and (not mb.alt):# and mb.button_index == BUTTON_LEFT:
 				if mb.pressed:
 					_mouse_pressed = true
 				
@@ -101,22 +106,56 @@ func _physics_process(delta):
 	var ray_dir = _editor_camera.project_ray_normal(_mouse_position)
 	var ray_distance = _editor_camera.far
 	
-	if _mouse_pressed:
-		var edited_scene_root = get_editor_interface().get_edited_scene_root()
-		var space_state =  get_viewport().world.direct_space_state
-		var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
-		
-		if not hit.empty():
-			var hit_instance_root = get_instance_root(hit.collider)
-			if not (hit_instance_root.get_parent() is Scatter3D):
-				var pos = hit.position
-				var instance = _pattern.instance()
-				instance.translation = pos
-				_node.add_child(instance)
-				instance.owner = edited_scene_root
+	var action = null
 	
+	if _mouse_pressed:
+		if Input.is_mouse_button_pressed(BUTTON_RIGHT):
+			action = ACTION_ERASE
+		else:
+			action = ACTION_PAINT
+
+		if action == ACTION_PAINT:
+			var edited_scene_root = get_editor_interface().get_edited_scene_root()
+			var space_state =  get_viewport().world.direct_space_state
+			var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
+			
+			if not hit.empty():
+				var hit_instance_root = get_instance_root(hit.collider)
+				
+				if not (hit_instance_root.get_parent() is Scatter3D):
+					var pos = hit.position
+					var instance = _pattern.instance()
+					instance.translation = pos
+					_node.add_child(instance)
+					instance.owner = edited_scene_root
+					_placed_instances.append(instance)
+	
+		elif action == ACTION_ERASE:
+			var time_before = OS.get_ticks_usec()
+			var hits = VisualServer.instances_cull_ray(ray_origin, ray_dir, _node.get_world().scenario)
+
+			if len(hits) > 0:
+
+				var instance = null
+				for hit_object_id in hits:
+					var hit = instance_from_id(hit_object_id)
+					if hit is Spatial:
+						instance = get_scatter_child_instance(hit, _node)
+						if instance != null:
+							break
+				
+				if instance != null:
+					assert(instance.get_parent() == _node)
+					instance.get_parent().remove_child(instance)
+					_removed_instances.append(instance)
+
 	if _pending_paint_completed:
+		if action == ACTION_PAINT:
 		# TODO Append undo action
+			_placed_instances.clear()
+			
+		elif action == ACTION_ERASE:
+			_removed_instances.clear()
 		_pending_paint_completed = false
 
 
@@ -135,6 +174,16 @@ static func get_node_in_parents(node, klass):
 		node = node.get_parent()
 		if node != null and node is klass:
 			return node
+	return null
+
+
+static func get_scatter_child_instance(node, scatter_root):
+	var parent = node
+	while parent != null:
+		parent = node.get_parent()
+		if parent != null and parent == scatter_root:
+			return node
+		node = parent
 	return null
 
 
