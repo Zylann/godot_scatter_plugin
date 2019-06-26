@@ -9,12 +9,14 @@ const ACTION_ERASE = 1
 var _node = null
 var _pattern = null
 var _mouse_pressed = false
+var _mouse_button = BUTTON_LEFT
 var _pending_paint_completed = false
 var _mouse_position = Vector2()
 var _editor_camera = null
 var _collision_mask = 1
 var _placed_instances = []
 var _removed_instances = []
+var _disable_undo = false
 
 
 static func get_icon(name):
@@ -76,6 +78,7 @@ func forward_spatial_gui_input(p_camera, p_event):
 			if (not mb.control) and (not mb.alt):# and mb.button_index == BUTTON_LEFT:
 				if mb.pressed:
 					_mouse_pressed = true
+					_mouse_button = mb.button_index
 				
 				captured_event = true
 				
@@ -107,13 +110,13 @@ func _physics_process(delta):
 	var ray_distance = _editor_camera.far
 	
 	var action = null
+	match _mouse_button:
+		BUTTON_LEFT:
+			action = ACTION_PAINT
+		BUTTON_RIGHT:
+			action = ACTION_ERASE
 	
 	if _mouse_pressed:
-		if Input.is_mouse_button_pressed(BUTTON_RIGHT):
-			action = ACTION_ERASE
-		else:
-			action = ACTION_PAINT
-
 		if action == ACTION_PAINT:
 			var edited_scene_root = get_editor_interface().get_edited_scene_root()
 			var space_state =  get_viewport().world.direct_space_state
@@ -144,6 +147,7 @@ func _physics_process(delta):
 						if instance != null:
 							break
 				
+				#print("Hits: ", len(hits), ", instance: ", instance)
 				if instance != null:
 					assert(instance.get_parent() == _node)
 					instance.get_parent().remove_child(instance)
@@ -151,16 +155,69 @@ func _physics_process(delta):
 
 	if _pending_paint_completed:
 		if action == ACTION_PAINT:
-		# TODO Append undo action
+			# TODO This will creep memory until the scene is closed...
+			# Because in Godot, undo/redo of node creation/deletion is done by NOT deleting them.
+			# To stay in line with this, I have to do the same...
+			var ur = get_undo_redo()
+			ur.create_action("Paint scenes")
+			for instance in _placed_instances:
+				# This is what allows nodes to be freed
+				ur.add_do_reference(instance)
+			_disable_undo = true
+			ur.add_do_method(self, "_redo_paint", _node.get_path(), _placed_instances.duplicate(false))
+			ur.add_undo_method(self, "_undo_paint", _node.get_path(), _placed_instances.duplicate(false))
+			ur.commit_action()
+			_disable_undo = false
 			_placed_instances.clear()
 			
 		elif action == ACTION_ERASE:
+			var ur = get_undo_redo()
+			ur.create_action("Erase painted scenes")
+			for instance in _removed_instances:
+				ur.add_undo_reference(instance)
+			_disable_undo = true
+			ur.add_do_method(self, "_redo_erase", _node.get_path(), _removed_instances.duplicate(false))
+			ur.add_undo_method(self, "_undo_erase", _node.get_path(), _removed_instances.duplicate(false))
+			ur.commit_action()
+			_disable_undo = false
 			_removed_instances.clear()
+		
 		_pending_paint_completed = false
-
 
 #func resnap_instances():
 #	pass
+
+
+func _redo_paint(parent_path, instances_data):
+	if _disable_undo:
+		return
+	var parent = get_node(parent_path)
+	for instance in instances_data:
+		parent.add_child(instance)
+
+
+func _undo_paint(parent_path, instances_data):
+	if _disable_undo:
+		return
+	var parent = get_node(parent_path)
+	for instance in instances_data:
+		parent.remove_child(instance)
+
+
+func _redo_erase(parent_path, instances_data):
+	if _disable_undo:
+		return
+	var parent = get_node(parent_path)
+	for instance in instances_data:
+		instance.get_parent().remove_child(instance)
+
+
+func _undo_erase(parent_path, instances_data):
+	if _disable_undo:
+		return
+	var parent = get_node(parent_path)
+	for instance in instances_data:
+		parent.add_child(instance)
 
 
 static func get_instance_root(node):
