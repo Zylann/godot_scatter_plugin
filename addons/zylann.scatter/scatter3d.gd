@@ -2,8 +2,7 @@ tool
 extends Spatial
 
 
-#export var group = "scatter_environment"
-
+# TODO Serialize packed scenes
 var _scenes = []
 
 

@@ -2,6 +2,7 @@ tool
 extends EditorPlugin
 
 const Scatter3D = preload("res://addons/zylann.scatter/scatter3d.gd")
+const PaletteControl = preload("res://addons/zylann.scatter/tools/palette.tscn")
 
 const ACTION_PAINT = 0
 const ACTION_ERASE = 1
@@ -18,6 +19,8 @@ var _placed_instances = []
 var _removed_instances = []
 var _disable_undo = false
 
+var _palette = null
+
 
 static func get_icon(name):
 	return load("res://addons/zylann.scatter/tools/icons/icon_" + name + ".svg")
@@ -28,12 +31,21 @@ func _enter_tree():
 	# The class is globally named but still need to register it just so the node creation dialog gets it
 	# https://github.com/godotengine/godot/issues/30048
 	add_custom_type("Scatter3D", "Spatial", Scatter3D, get_icon("scatter3d_node"))
+	
+	_palette = PaletteControl.instance()
+	_palette.connect("pattern_selected", self, "_on_Palette_pattern_selected")
+	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_LEFT, _palette)
+	_palette.call_deferred("setup_dialogs", get_editor_interface().get_base_control())
 
 
 func _exit_tree():
 	print("Scatter plugin Exit tree")
 	edit(null)
+	
 	remove_custom_type("Scatter3D")
+	
+	_palette.queue_free()
+	_palette = null
 
 
 func handles(obj):
@@ -48,12 +60,14 @@ func edit(obj):
 			set_pattern(patterns[0])
 		else:
 			set_pattern(null)
+		_palette.load_patterns(patterns)
 		set_physics_process(true)
 	else:
 		set_physics_process(false)
 
 
 func make_visible(visible):
+	_palette.set_visible(visible)
 	# TODO Workaround https://github.com/godotengine/godot/issues/6459
 	# When the user selects another node, I want the plugin to release its references.
 	if not visible:
@@ -248,3 +262,6 @@ func set_pattern(pattern):
 	_pattern = pattern
 
 
+func _on_Palette_pattern_selected(pattern_index):
+	var patterns = _node.get_patterns()
+	set_pattern(patterns[pattern_index])
