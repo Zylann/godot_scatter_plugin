@@ -34,6 +34,8 @@ func _enter_tree():
 	
 	_palette = PaletteControl.instance()
 	_palette.connect("pattern_selected", self, "_on_Palette_pattern_selected")
+	_palette.connect("pattern_added", self, "_on_Palette_pattern_added")
+	_palette.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_LEFT, _palette)
 	_palette.call_deferred("setup_dialogs", get_editor_interface().get_base_control())
 
@@ -265,3 +267,11 @@ func set_pattern(pattern):
 func _on_Palette_pattern_selected(pattern_index):
 	var patterns = _node.get_patterns()
 	set_pattern(patterns[pattern_index])
+
+
+func _on_Palette_pattern_added(path):
+	_node.add_pattern(path)
+
+
+func _on_Palette_pattern_removed(path):
+	_node.remove_pattern(path)
