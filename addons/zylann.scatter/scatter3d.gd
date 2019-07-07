@@ -40,3 +40,9 @@ func remove_pattern(path):
 			property_list_changed_notify()
 			break
 
+
+func has_pattern(path):
+	for scene in _scenes:
+		if scene.resource_path == path:
+			return true
+	return false
