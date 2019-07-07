@@ -2,21 +2,26 @@ tool
 extends Spatial
 
 
-# TODO Serialize packed scenes
-var _scenes = []
+export(Array, PackedScene) var _scenes = []
 
 
 func _ready():
-	# TODO Temporary test
-	_scenes.append(load("res://tests/props/placeholder_tree.tscn"))
+	_remove_dangling_patterns()
+
+
+func _remove_dangling_patterns():
 	# Remove null scenes in case they failed to load for some reason
+	var changed = false
 	var i = 0
 	while i < len(_scenes):
 		if _scenes[i] == null:
 			printerr(get_path(), ": Scene ", i, " failed to load")
 			_scenes.remove(i)
+			changed = true
 		else:
 			i += 1
+	if changed:
+		property_list_changed_notify()
 
 
 func get_patterns():
@@ -25,11 +30,13 @@ func get_patterns():
 
 func add_pattern(path):
 	_scenes.append(load(path))
+	property_list_changed_notify()
 
 
 func remove_pattern(path):
 	for i in len(_scenes):
 		if _scenes[i].resource_path == path:
 			_scenes.remove(i)
+			property_list_changed_notify()
 			break
 
