@@ -18,6 +18,7 @@ var _collision_mask = 1
 var _placed_instances = []
 var _removed_instances = []
 var _disable_undo = false
+var _pattern_margin = 0.0
 
 var _palette = null
 var _error_dialog = null
@@ -48,7 +49,7 @@ func _enter_tree():
 	_error_dialog.hide()
 	_error_dialog.window_title = "Error"
 	base_control.add_child(_error_dialog)
-
+	
 
 func _exit_tree():
 	print("Scatter plugin Exit tree")
@@ -147,7 +148,6 @@ func _physics_process(delta):
 	
 	if _mouse_pressed:
 		if action == ACTION_PAINT:
-			var edited_scene_root = get_editor_interface().get_edited_scene_root()
 			var space_state =  get_viewport().world.direct_space_state
 			var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
 			
@@ -156,11 +156,21 @@ func _physics_process(delta):
 				
 				if not (hit_instance_root.get_parent() is Scatter3D):
 					var pos = hit.position
-					var instance = _pattern.instance()
-					instance.translation = pos
-					_node.add_child(instance)
-					instance.owner = edited_scene_root
-					_placed_instances.append(instance)
+					
+					# Not accurate, you might still paint stuff too close to others,
+					# but should be good enough and cheap
+					var too_close = false
+					if len(_placed_instances) != 0:
+						var last_placed_transform = _placed_instances[-1].global_transform
+						if last_placed_transform.origin.distance_to(pos) < _pattern_margin:
+							too_close = true
+					
+					if not too_close:
+						var instance = _pattern.instance()
+						instance.translation = pos
+						_node.add_child(instance)
+						instance.owner = get_editor_interface().get_edited_scene_root()
+						_placed_instances.append(instance)
 	
 		elif action == ACTION_ERASE:
 			var time_before = OS.get_ticks_usec()
@@ -285,7 +295,13 @@ static func is_self_or_parent_scene(fpath, node):
 
 
 func set_pattern(pattern):
-	_pattern = pattern
+	if _pattern != pattern:
+		_pattern = pattern
+		var temp = pattern.instance()
+		var aabb = get_scene_aabb(temp)
+		_pattern_margin = aabb.size.length() * 0.4
+		temp.free()
+		print("Pattern margin is ", _pattern_margin)
 
 
 func _on_Palette_pattern_selected(pattern_index):
@@ -359,4 +375,16 @@ func verify_scene(fpath):
 func _show_error(msg):
 	_error_dialog.dialog_text = msg
 	_error_dialog.popup_centered_minsize()
+
+
+static func get_scene_aabb(node, aabb=AABB()):
+	if node is VisualInstance:
+		var node_aabb = node.global_transform.xform(node.get_aabb())
+		if aabb == AABB():
+			aabb = node_aabb
+		else:
+			aabb = aabb.merge(node_aabb)
+	for i in node.get_child_count():
+		aabb = get_scene_aabb(node.get_child(i), aabb)
+	return aabb
 
