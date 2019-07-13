@@ -168,6 +168,7 @@ func _physics_process(delta):
 					if not too_close:
 						var instance = _pattern.instance()
 						instance.translation = pos
+						instance.rotate_y(rand_range(-PI, PI))
 						_node.add_child(instance)
 						instance.owner = get_editor_interface().get_edited_scene_root()
 						_placed_instances.append(instance)
