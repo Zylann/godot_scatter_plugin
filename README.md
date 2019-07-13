@@ -5,7 +5,7 @@ Scene scattering tool for Godot Engine
 
 This plugin adds tools to help placing many scene instances in an environment by "painting" over it, rather than dragging and dropping them manually from the file system dock.
 
-It is still a very rough prototype, use at your own risk.
+It adds a new node `Scatter3D`. Add it to the scene, add scenes you wish to be able to paint into the list, and start placing them.
 
 
 Installation
