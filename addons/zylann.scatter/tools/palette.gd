@@ -41,7 +41,7 @@ func load_patterns(patterns):
 func add_pattern(scene_path):
 	# TODO I need scene thumbnails from the editor
 	var default_icon = get_icon("PackedScene", "EditorIcons")
-	var pattern_name = scene_path.get_file()
+	var pattern_name = scene_path.get_file().get_basename()
 	var i = _item_list.get_item_count()
 	_item_list.add_item(pattern_name, default_icon)
 	_item_list.set_item_metadata(i, scene_path)
