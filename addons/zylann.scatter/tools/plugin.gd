@@ -43,6 +43,7 @@ func _enter_tree():
 	_palette.connect("pattern_removed", self, "_on_Palette_pattern_removed")
 	_palette.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_LEFT, _palette)
+	_palette.set_preview_provider(get_editor_interface().get_resource_previewer())
 	_palette.call_deferred("setup_dialogs", base_control)
 
 	_error_dialog = AcceptDialog.new()

@@ -5,9 +5,10 @@ signal pattern_selected(pattern_index)
 signal pattern_added(path)
 signal pattern_removed(path)
 
-onready var _item_list = get_node("VBoxContainer/ItemList")
+onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
 
 var _file_dialog = null
+var _preview_provider : EditorResourcePreview = null
 
 
 func setup_dialogs(base_control):
@@ -18,6 +19,13 @@ func setup_dialogs(base_control):
 	_file_dialog.connect("file_selected", self, "_on_FileDialog_file_selected")
 	_file_dialog.hide()
 	base_control.add_child(_file_dialog)
+
+
+func set_preview_provider(provider : EditorResourcePreview):
+	assert(_preview_provider == null)
+	assert(provider != null)
+	_preview_provider = provider
+	_preview_provider.connect("preview_invalidated", self, "_on_EditorResourcePreview_preview_invalidated")
 
 
 func _exit_tree():
@@ -45,6 +53,25 @@ func add_pattern(scene_path):
 	var i = _item_list.get_item_count()
 	_item_list.add_item(pattern_name, default_icon)
 	_item_list.set_item_metadata(i, scene_path)
+	
+	_preview_provider.queue_resource_preview( \
+		scene_path, self, "_on_EditorResourcePreview_preview_loaded", null)
+
+
+func _on_EditorResourcePreview_preview_loaded(path, texture, userdata):
+	var i = find_pattern(path)
+	if i == -1:
+		return
+	if texture != null:
+		_item_list.set_item_icon(i, texture)
+	else:
+		print("No preview available for ", path)
+
+
+func _on_EditorResourcePreview_preview_invalidated(path):
+	# TODO Handle thumbnail invalidation
+	#`path` is actually the folder in which the file was, NOT the file itself... useful for FileSystemDock only :(
+	pass
 
 
 func remove_pattern(scene_path):
