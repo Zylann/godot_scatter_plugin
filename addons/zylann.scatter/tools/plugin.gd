@@ -3,6 +3,7 @@ extends EditorPlugin
 
 const Scatter3D = preload("res://addons/zylann.scatter/scatter3d.gd")
 const PaletteControl = preload("res://addons/zylann.scatter/tools/palette.tscn")
+const Util = preload("res://addons/zylann.scatter/tools/util.gd")
 
 const ACTION_PAINT = 0
 const ACTION_ERASE = 1
@@ -152,7 +153,7 @@ func _physics_process(delta):
 			var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
 			
 			if not hit.empty():
-				var hit_instance_root = get_instance_root(hit.collider)
+				var hit_instance_root = Util.get_instance_root(hit.collider)
 				
 				if not (hit_instance_root.get_parent() is Scatter3D):
 					var pos = hit.position
@@ -260,21 +261,6 @@ func _undo_erase(parent_path, instances_data):
 		parent.add_child(instance)
 
 
-static func get_instance_root(node):
-	# TODO Could use `owner`?
-	while node != null and node.filename == "":
-		node = node.get_parent()
-	return node
-
-
-static func get_node_in_parents(node, klass):
-	while node != null:
-		node = node.get_parent()
-		if node != null and node is klass:
-			return node
-	return null
-
-
 # Goes up the tree from the given node and finds the first Scatter layer,
 # then return the immediate child of it from which the node is child of
 static func get_scatter_child_instance(node, scatter_root):
@@ -287,19 +273,13 @@ static func get_scatter_child_instance(node, scatter_root):
 	return null
 
 
-static func is_self_or_parent_scene(fpath, node):
-	while node != null:
-		if node.filename == fpath:
-			return true
-		node = node.get_parent()
-	return false
-
-
 func set_pattern(pattern):
 	if _pattern != pattern:
 		_pattern = pattern
 		var temp = pattern.instance()
-		var aabb = get_scene_aabb(temp)
+		# TODO This causes errors because of accessing `global_transform` outside the tree... Oo
+		# See https://github.com/godotengine/godot/issues/30445
+		var aabb = Util.get_scene_aabb(temp)
 		_pattern_margin = aabb.size.length() * 0.4
 		temp.free()
 		print("Pattern margin is ", _pattern_margin)
@@ -355,7 +335,7 @@ func verify_scene(fpath):
 		return false
 	
 	# Check it's not the current scene itself
-	if is_self_or_parent_scene(fpath, _node):
+	if Util.is_self_or_parent_scene(fpath, _node):
 		_show_error("The selected scene can't be added recursively")
 		return false
 	
@@ -377,15 +357,4 @@ func _show_error(msg):
 	_error_dialog.dialog_text = msg
 	_error_dialog.popup_centered_minsize()
 
-
-static func get_scene_aabb(node, aabb=AABB()):
-	if node is VisualInstance:
-		var node_aabb = node.global_transform.xform(node.get_aabb())
-		if aabb == AABB():
-			aabb = node_aabb
-		else:
-			aabb = aabb.merge(node_aabb)
-	for i in node.get_child_count():
-		aabb = get_scene_aabb(node.get_child(i), aabb)
-	return aabb
 
