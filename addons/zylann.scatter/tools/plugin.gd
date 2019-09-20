@@ -151,7 +151,7 @@ func _physics_process(delta):
 	if _mouse_pressed:
 		if action == ACTION_PAINT:
 			var space_state =  get_viewport().world.direct_space_state
-			var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
+			var hit = space_state.intersect_ray(ray_origin, ray_origin + ray_dir * ray_distance, [], _collision_mask)
 			
 			if not hit.empty():
 				var hit_instance_root
