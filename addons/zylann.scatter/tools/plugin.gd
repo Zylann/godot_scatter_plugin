@@ -154,9 +154,12 @@ func _physics_process(delta):
 			var hit = space_state.intersect_ray(ray_origin, ray_dir * ray_distance, [], _collision_mask)
 			
 			if not hit.empty():
-				var hit_instance_root = Util.get_instance_root(hit.collider)
+				var hit_instance_root
+				# Collider can be null if the hit is on something that has no associated node
+				if hit.collider != null:
+					hit_instance_root = Util.get_instance_root(hit.collider)
 				
-				if not (hit_instance_root.get_parent() is Scatter3D):
+				if hit.collider == null or not (hit_instance_root.get_parent() is Scatter3D):
 					var pos = hit.position
 					
 					# Not accurate, you might still paint stuff too close to others,
