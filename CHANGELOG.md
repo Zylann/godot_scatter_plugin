@@ -5,6 +5,13 @@ This is a high-level changelog for each released versions of the plugin.
 For a more detailed list of past and incoming changes, see the commit history.
 
 
+1.0.1
+----------
+
+- Fixed error when painting on an HTerrain plugin node
+- Fixed placement error caused by bad raycasting call
+
+
 1.0
 ----
 
