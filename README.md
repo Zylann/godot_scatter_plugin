@@ -22,6 +22,7 @@ How to use
 - Add a `Scatter3D` node to the scene, or select one already present
 - Add scenes you wish to be able to paint into the list, and select the one you want to paint
 - Start placing them by left-clicking in the scene. You can remove them using right-click.
+  - This will create scene instances as child of the `Scatter3D` node.
 
 
 License
