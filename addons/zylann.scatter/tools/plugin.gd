@@ -161,7 +161,7 @@ func _physics_process(delta):
 					var too_close = false
 					if len(_placed_instances) != 0:
 						var last_placed_transform = _placed_instances[-1].global_transform
-						if last_placed_transform.origin.distance_to(pos) < _pattern_margin:
+						if last_placed_transform.origin.distance_to(pos) < _pattern_margin + _palette.get_configured_margin():
 							too_close = true
 					
 					if not too_close:

@@ -6,6 +6,7 @@ signal pattern_added(path)
 signal pattern_removed(path)
 
 onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
+onready var _margin_spin_box : SpinBox = get_node("VBoxContainer/MarginContainer/MarginSpinBox")
 
 var _file_dialog = null
 var _preview_provider : EditorResourcePreview = null
@@ -94,6 +95,10 @@ func _on_ItemList_multi_selected(_index, _selected):
 	for item in _item_list.get_selected_items():
 		selected.append(_item_list.get_item_metadata(item))
 	emit_signal("patterns_selected", selected)
+
+
+func get_configured_margin():
+	return _margin_spin_box.value
 
 
 func _on_AddButton_pressed():
