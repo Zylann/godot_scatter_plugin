@@ -8,6 +8,9 @@ anchor_bottom = 1.0
 margin_right = -874.0
 rect_min_size = Vector2( 150, 0 )
 script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
@@ -16,6 +19,9 @@ margin_left = 4.0
 margin_top = 4.0
 margin_right = -4.0
 margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_right = 142.0
@@ -32,11 +38,22 @@ margin_right = 117.0
 margin_bottom = 20.0
 text = "Remove"
 
-[node name="ItemList" type="ItemList" parent="VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 24.0
+margin_right = 142.0
+margin_bottom = 48.0
+
+[node name="HeightCorrectionCheckBox" type="CheckBox" parent="VBoxContainer/HBoxContainer2"]
+margin_right = 139.0
+margin_bottom = 24.0
+text = "Height correction"
+
+[node name="ItemList" type="ItemList" parent="VBoxContainer"]
+margin_top = 52.0
 margin_right = 142.0
 margin_bottom = 592.0
 size_flags_vertical = 3
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_AddButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_RemoveButton_pressed"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer2/HeightCorrectionCheckBox" to="." method="_on_HeightCorrectionCheckBox_toggled"]
 [connection signal="item_selected" from="VBoxContainer/ItemList" to="." method="_on_ItemList_item_selected"]

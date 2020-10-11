@@ -23,6 +23,7 @@ How to use
 - Add scenes you wish to be able to paint into the list, and select the one you want to paint
 - Start placing them by left-clicking in the scene. You can remove them using right-click.
   - This will create scene instances as child of the `Scatter3D` node.
+- When the "height correction" checkbox is checked, left clicking will snap colliding objects to the terrain. This is useful if you change the terrain for an existing scene and want to snap some or all of the objects to the new terrain height.
 
 
 License
