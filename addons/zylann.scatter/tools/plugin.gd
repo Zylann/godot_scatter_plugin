@@ -7,6 +7,7 @@ const Util = preload("res://addons/zylann.scatter/tools/util.gd")
 
 const ACTION_PAINT = 0
 const ACTION_ERASE = 1
+const ACTION_HEIGHTCORRECTION = 2
 
 var _node = null
 var _pattern = null
@@ -18,8 +19,12 @@ var _editor_camera = null
 var _collision_mask = 1
 var _placed_instances = []
 var _removed_instances = []
+var _heightcorrected_instances = []
+var _heightcorrected_positions_original = []
+var _heightcorrected_positions = []
 var _disable_undo = false
 var _pattern_margin = 0.0
+var _heightcorrection_enabled = false
 
 var _palette = null
 var _error_dialog = null
@@ -41,6 +46,7 @@ func _enter_tree():
 	_palette.connect("pattern_selected", self, "_on_Palette_pattern_selected")
 	_palette.connect("pattern_added", self, "_on_Palette_pattern_added")
 	_palette.connect("pattern_removed", self, "_on_Palette_pattern_removed")
+	_palette.connect("heightcorrection_changed", self, "_on_Palette_heightcorrection_changed")
 	_palette.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_LEFT, _palette)
 	_palette.set_preview_provider(get_editor_interface().get_resource_previewer())
@@ -144,7 +150,10 @@ func _physics_process(delta):
 	var action = null
 	match _mouse_button:
 		BUTTON_LEFT:
-			action = ACTION_PAINT
+			if _heightcorrection_enabled:
+				action = ACTION_HEIGHTCORRECTION
+			else:
+				action = ACTION_PAINT
 		BUTTON_RIGHT:
 			action = ACTION_ERASE
 	
@@ -197,6 +206,45 @@ func _physics_process(delta):
 					assert(instance.get_parent() == _node)
 					instance.get_parent().remove_child(instance)
 					_removed_instances.append(instance)
+		
+		elif action == ACTION_HEIGHTCORRECTION:
+			var hits = VisualServer.instances_cull_ray(ray_origin, ray_dir, _node.get_world().scenario)
+			
+			if len(hits) > 0:
+
+				var instance = null
+				for hit_object_id in hits:
+					var hit = instance_from_id(hit_object_id)
+					if hit is Spatial:
+						instance = get_scatter_child_instance(hit, _node)
+						if instance != null:
+							break
+				
+				if instance != null:
+					assert(instance.get_parent() == _node)
+					
+					var space_state =  get_viewport().world.direct_space_state
+					var hit = space_state.intersect_ray(ray_origin, ray_origin + ray_dir * ray_distance, [], _collision_mask)
+					
+					if not hit.empty():
+						var hit_instance_root
+						# Collider can be null if the hit is on something that has no associated node
+						if hit.collider != null:
+							hit_instance_root = Util.get_instance_root(hit.collider)
+						
+						if hit.collider == null or not (hit_instance_root.get_parent() is Scatter3D):
+							if not _heightcorrected_instances.has(instance):
+								_heightcorrected_instances.append(instance)
+								_heightcorrected_positions_original.append(instance.transform.origin.y)
+								_heightcorrected_positions.append(hit.position.y)
+							else:
+								var i = _heightcorrected_instances.find(instance)
+								# original is not updated here because we want to undo
+								# to the original state
+								_heightcorrected_positions[i] = hit.position.y
+							
+							instance.transform.origin.y = hit.position.y
+
 
 	if _pending_paint_completed:
 		if action == ACTION_PAINT:
@@ -227,6 +275,18 @@ func _physics_process(delta):
 			_disable_undo = false
 			_removed_instances.clear()
 		
+		elif action == ACTION_HEIGHTCORRECTION:
+			var ur = get_undo_redo()
+			ur.create_action("Height correction")
+			_disable_undo = true
+			ur.add_do_method(self, "_do_heightcorrection", _heightcorrected_instances.duplicate(false), _heightcorrected_positions.duplicate(false))
+			ur.add_undo_method(self, "_do_heightcorrection", _heightcorrected_instances.duplicate(false), _heightcorrected_positions_original.duplicate(false))
+			ur.commit_action()
+			_disable_undo = false
+			_heightcorrected_instances.clear()
+			_heightcorrected_positions_original.clear()
+			_heightcorrected_positions.clear()
+			
 		_pending_paint_completed = false
 
 #func resnap_instances():
@@ -263,6 +323,14 @@ func _undo_erase(parent_path, instances_data):
 	var parent = get_node(parent_path)
 	for instance in instances_data:
 		parent.add_child(instance)
+
+func _do_heightcorrection(instances_data, positions_data):
+	if _disable_undo:
+		return
+	for i in range(instances_data.size()):
+		var instance = instances_data[i]
+		var pos = positions_data[i]
+		instance.transform.origin.y = pos
 
 
 # Goes up the tree from the given node and finds the first Scatter layer,
@@ -311,6 +379,10 @@ func _on_Palette_pattern_removed(path):
 	ur.add_do_method(self, "remove_pattern", path)
 	ur.add_undo_method(self, "add_pattern", path)
 	ur.commit_action()
+
+
+func _on_Palette_heightcorrection_changed(enabled):
+	_heightcorrection_enabled = enabled
 
 
 func add_pattern(path):

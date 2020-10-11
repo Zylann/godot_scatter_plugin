@@ -4,6 +4,7 @@ extends Control
 signal pattern_selected(pattern_index)
 signal pattern_added(path)
 signal pattern_removed(path)
+signal heightcorrection_changed(enabled)
 
 onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
 
@@ -125,3 +126,5 @@ func _on_FileDialog_file_selected(fpath):
 	emit_signal("pattern_added", fpath)
 
 
+func _on_HeightCorrectionCheckBox_toggled(button_pressed):
+	emit_signal("heightcorrection_changed", button_pressed)
