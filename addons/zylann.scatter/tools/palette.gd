@@ -1,7 +1,7 @@
 tool
 extends Control
 
-signal pattern_selected(pattern_index)
+signal patterns_selected(pattern_paths)
 signal pattern_added(path)
 signal pattern_removed(path)
 
@@ -35,15 +35,10 @@ func _exit_tree():
 
 
 func load_patterns(patterns):
-	var selected_pattern = get_selected_pattern()
 	_item_list.clear()
 	#print("Loading ", len(patterns), " patterns")
 	for scene in patterns:
 		add_pattern(scene.resource_path)
-	if selected_pattern != null:
-		var i = find_pattern(selected_pattern.path)
-		if i != -1:
-			_item_list.select(i)
 
 
 func add_pattern(scene_path):
@@ -80,18 +75,6 @@ func remove_pattern(scene_path):
 		_item_list.remove_item(i)
 
 
-func get_selected_pattern():
-	var selected_items = _item_list.get_selected_items()
-	if len(selected_items) == 0:
-		return null
-	var i = selected_items[0]
-	var scene_path = _item_list.get_item_metadata(i)
-	return {
-		"index": i,
-		"path": scene_path
-	}
-
-
 func find_pattern(path):
 	for i in _item_list.get_item_count():
 		var scene_path = _item_list.get_item_metadata(i)
@@ -106,8 +89,11 @@ func select_pattern(path):
 		_item_list.select(i)
 
 
-func _on_ItemList_item_selected(index):
-	emit_signal("pattern_selected", index)
+func _on_ItemList_multi_selected(_index, _selected):
+	var selected = []
+	for item in _item_list.get_selected_items():
+		selected.append(_item_list.get_item_metadata(item))
+	emit_signal("patterns_selected", selected)
 
 
 func _on_AddButton_pressed():
@@ -115,13 +101,18 @@ func _on_AddButton_pressed():
 
 
 func _on_RemoveButton_pressed():
-	var s = get_selected_pattern()
-	if s == null:
-		return
-	emit_signal("pattern_removed", s.path)
+	for item in _item_list.get_selected_items():
+		emit_signal("pattern_removed", _item_list.get_item_metadata(item))
 
 
 func _on_FileDialog_file_selected(fpath):
 	emit_signal("pattern_added", fpath)
 
 
+func can_drop_data(position, data):
+	return data is Dictionary and data.get("type") == "files"
+
+
+func drop_data(position, data):
+	for file in data.files:
+		emit_signal("pattern_added", file)

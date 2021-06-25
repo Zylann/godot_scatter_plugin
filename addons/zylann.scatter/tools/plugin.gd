@@ -9,7 +9,7 @@ const ACTION_PAINT = 0
 const ACTION_ERASE = 1
 
 var _node = null
-var _pattern = null
+var _selected_patterns = []
 var _mouse_pressed = false
 var _mouse_button = BUTTON_LEFT
 var _pending_paint_completed = false
@@ -38,7 +38,7 @@ func _enter_tree():
 	var base_control = get_editor_interface().get_base_control()
 	
 	_palette = PaletteControl.instance()
-	_palette.connect("pattern_selected", self, "_on_Palette_pattern_selected")
+	_palette.connect("patterns_selected", self, "_on_Palette_patterns_selected")
 	_palette.connect("pattern_added", self, "_on_Palette_pattern_added")
 	_palette.connect("pattern_removed", self, "_on_Palette_pattern_removed")
 	_palette.hide()
@@ -74,10 +74,6 @@ func edit(obj):
 	_node = obj
 	if _node:
 		var patterns = _node.get_patterns()
-		if len(patterns) > 0:
-			set_pattern(patterns[0])
-		else:
-			set_pattern(null)
 		_palette.load_patterns(patterns)
 		set_physics_process(true)
 	else:
@@ -134,9 +130,7 @@ func _physics_process(delta):
 		return
 	if _node == null:
 		return
-	if _pattern == null:
-		return
-		
+	
 	var ray_origin = _editor_camera.project_ray_origin(_mouse_position)
 	var ray_dir = _editor_camera.project_ray_normal(_mouse_position)
 	var ray_distance = _editor_camera.far
@@ -149,7 +143,7 @@ func _physics_process(delta):
 			action = ACTION_ERASE
 	
 	if _mouse_pressed:
-		if action == ACTION_PAINT:
+		if action == ACTION_PAINT and len(_selected_patterns) > 0:
 			var space_state =  get_viewport().world.direct_space_state
 			var hit = space_state.intersect_ray(ray_origin, ray_origin + ray_dir * ray_distance, [], _collision_mask)
 			
@@ -171,7 +165,7 @@ func _physics_process(delta):
 							too_close = true
 					
 					if not too_close:
-						var instance = _pattern.instance()
+						var instance = create_pattern_instance()
 						instance.translation = pos
 						instance.rotate_y(rand_range(-PI, PI))
 						_node.add_child(instance)
@@ -277,21 +271,29 @@ static func get_scatter_child_instance(node, scatter_root):
 	return null
 
 
-func set_pattern(pattern):
-	if _pattern != pattern:
-		_pattern = pattern
-		var temp = pattern.instance()
-		# TODO This causes errors because of accessing `global_transform` outside the tree... Oo
-		# See https://github.com/godotengine/godot/issues/30445
-		var aabb = Util.get_scene_aabb(temp)
-		_pattern_margin = aabb.size.length() * 0.4
-		temp.free()
+func set_selected_patterns(patterns):
+	if _selected_patterns != patterns:
+		_selected_patterns = patterns
+		var largest_aabb = AABB()
+		for pattern in patterns:
+			var temp = pattern.instance()
+			# TODO This causes errors because of accessing `global_transform` outside the tree... Oo
+			# See https://github.com/godotengine/godot/issues/30445
+			largest_aabb = largest_aabb.merge(Util.get_scene_aabb(temp))
+			temp.free()
+		_pattern_margin = largest_aabb.size.length() * 0.4
 		print("Pattern margin is ", _pattern_margin)
 
 
-func _on_Palette_pattern_selected(pattern_index):
-	var patterns = _node.get_patterns()
-	set_pattern(patterns[pattern_index])
+func create_pattern_instance():
+	return _selected_patterns[floor(randf() * _selected_patterns.size())].instance()
+
+
+func _on_Palette_patterns_selected(pattern_paths):
+	var scenes = []
+	for file in pattern_paths:
+		scenes.append(load(file))
+	set_selected_patterns(scenes)
 
 
 func _on_Palette_pattern_added(path):
