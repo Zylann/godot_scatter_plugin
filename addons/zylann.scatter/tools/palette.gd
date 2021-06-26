@@ -3,7 +3,7 @@ extends Control
 
 signal patterns_selected(pattern_paths)
 signal pattern_added(path)
-signal pattern_removed(path)
+signal patterns_removed(path)
 
 onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
 onready var _margin_spin_box : SpinBox = get_node("VBoxContainer/MarginContainer/MarginSpinBox")
@@ -106,8 +106,10 @@ func _on_AddButton_pressed():
 
 
 func _on_RemoveButton_pressed():
+	var removed = []
 	for item in _item_list.get_selected_items():
-		emit_signal("pattern_removed", _item_list.get_item_metadata(item))
+		removed.append(_item_list.get_item_metadata(item))
+	emit_signal("patterns_removed", removed)
 
 
 func _on_FileDialog_file_selected(fpath):
