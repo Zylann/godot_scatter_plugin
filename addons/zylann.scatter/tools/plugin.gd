@@ -42,7 +42,7 @@ func _enter_tree():
 	_palette = PaletteScene.instance()
 	_palette.connect("patterns_selected", self, "_on_Palette_patterns_selected")
 	_palette.connect("pattern_added", self, "_on_Palette_pattern_added")
-	_palette.connect("pattern_removed", self, "_on_Palette_pattern_removed")
+	_palette.connect("patterns_removed", self, "_on_Palette_patterns_removed")
 	_palette.hide()
 	add_control_to_container(EditorPlugin.CONTAINER_SPATIAL_EDITOR_SIDE_LEFT, _palette)
 	_palette.set_preview_provider(get_editor_interface().get_resource_previewer())
@@ -309,11 +309,12 @@ func _on_Palette_pattern_added(path):
 	ur.commit_action()
 
 
-func _on_Palette_pattern_removed(path):
+func _on_Palette_patterns_removed(paths):
 	var ur = get_undo_redo()
 	ur.create_action("Remove scatter pattern")
-	ur.add_do_method(self, "remove_pattern", path)
-	ur.add_undo_method(self, "add_pattern", path)
+	for path in paths:
+		ur.add_do_method(self, "remove_pattern", path)
+		ur.add_undo_method(self, "add_pattern", path)
 	ur.commit_action()
 
 
