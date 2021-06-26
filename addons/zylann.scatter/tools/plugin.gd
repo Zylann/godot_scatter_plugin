@@ -30,7 +30,6 @@ static func get_icon(name):
 
 
 func _enter_tree():
-	print("Scatter plugin Enter tree")
 	# The class is globally named but still need to register it just so the node creation dialog gets it
 	# https://github.com/godotengine/godot/issues/30048
 	add_custom_type("Scatter3D", "Spatial", Scatter3D, get_icon("scatter3d_node"))
@@ -54,7 +53,6 @@ func _enter_tree():
 	
 
 func _exit_tree():
-	print("Scatter plugin Exit tree")
 	edit(null)
 	
 	remove_custom_type("Scatter3D")
@@ -282,7 +280,6 @@ func set_selected_patterns(patterns):
 			largest_aabb = largest_aabb.merge(Util.get_scene_aabb(temp))
 			temp.free()
 		_pattern_margin = largest_aabb.size.length() * 0.4
-		print("Pattern margin is ", _pattern_margin)
 
 
 func create_pattern_instance():
@@ -316,13 +313,11 @@ func _on_Palette_pattern_removed(path):
 
 
 func add_pattern(path):
-	print("Adding pattern ", path)
 	_node.add_pattern(path)
 	_palette.add_pattern(path)
 
 
 func remove_pattern(path):
-	print("Removing pattern ", path)
 	_node.remove_pattern(path)
 	_palette.remove_pattern(path)
 
