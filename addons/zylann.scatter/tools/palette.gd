@@ -93,14 +93,14 @@ func select_pattern(path):
 		_item_list.select(i)
 
 
-func _on_ItemList_multi_selected(_index, _selected):
+func _on_ItemList_multi_selected(_unused_index, _unused_selected):
 	var selected = []
 	for item in _item_list.get_selected_items():
 		selected.append(_item_list.get_item_metadata(item))
 	emit_signal("patterns_selected", selected)
 
 
-func get_configured_margin():
+func get_configured_margin() -> float:
 	return _margin_spin_box.value
 
 
@@ -109,7 +109,7 @@ func _on_AddButton_pressed():
 
 
 func _on_RemoveButton_pressed():
-	var removed = []
+	var removed := []
 	for item in _item_list.get_selected_items():
 		removed.append(_item_list.get_item_metadata(item))
 	emit_signal("patterns_removed", removed)
