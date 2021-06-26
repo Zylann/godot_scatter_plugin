@@ -3,7 +3,7 @@ static func get_scene_aabb(node, aabb=AABB()):
 	if not node.visible:
 		return aabb
 	if node is VisualInstance:
-		var node_aabb = node.global_transform.xform(node.get_aabb())
+		var node_aabb = node.transform.xform(node.get_aabb())
 		if aabb == AABB():
 			aabb = node_aabb
 		else:
