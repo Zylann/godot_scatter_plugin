@@ -3,7 +3,8 @@ extends EditorPlugin
 
 const Scatter3D = preload("res://addons/zylann.scatter/scatter3d.gd")
 const PaletteScene = preload("res://addons/zylann.scatter/tools/palette.tscn")
-const Util = preload("res://addons/zylann.scatter/tools/util.gd")
+const Util = preload("../util/util.gd")
+const Logger = preload("../util/logger.gd")
 
 const ACTION_PAINT = 0
 const ACTION_ERASE = 1
@@ -20,6 +21,7 @@ var _placed_instances = []
 var _removed_instances = []
 var _disable_undo = false
 var _pattern_margin = 0.0
+var _logger = Logger.get_for(self)
 
 var _palette = null
 var _error_dialog = null
@@ -30,7 +32,7 @@ static func get_icon(name):
 
 
 func _enter_tree():
-	print("Scatter plugin Enter tree")
+	_logger.debug("Scatter plugin Enter tree")
 	# The class is globally named but still need to register it just so the node creation dialog gets it
 	# https://github.com/godotengine/godot/issues/30048
 	add_custom_type("Scatter3D", "Spatial", Scatter3D, get_icon("scatter3d_node"))
@@ -54,7 +56,7 @@ func _enter_tree():
 	
 
 func _exit_tree():
-	print("Scatter plugin Exit tree")
+	_logger.debug("Scatter plugin Exit tree")
 	edit(null)
 	
 	remove_custom_type("Scatter3D")
@@ -282,7 +284,7 @@ func set_selected_patterns(patterns):
 			largest_aabb = largest_aabb.merge(Util.get_scene_aabb(temp))
 			temp.free()
 		_pattern_margin = largest_aabb.size.length() * 0.4
-		print("Pattern margin is ", _pattern_margin)
+		_logger.debug(str("Pattern margin is ", _pattern_margin))
 
 
 func create_pattern_instance():
@@ -316,13 +318,13 @@ func _on_Palette_pattern_removed(path):
 
 
 func add_pattern(path):
-	print("Adding pattern ", path)
+	_logger.debug(str("Adding pattern ", path))
 	_node.add_pattern(path)
 	_palette.add_pattern(path)
 
 
 func remove_pattern(path):
-	print("Removing pattern ", path)
+	_logger.debug(str("Removing pattern ", path))
 	_node.remove_pattern(path)
 	_palette.remove_pattern(path)
 

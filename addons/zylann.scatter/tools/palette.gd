@@ -1,6 +1,8 @@
 tool
 extends Control
 
+const Logger = preload("../util/logger.gd")
+
 signal patterns_selected(pattern_paths)
 signal pattern_added(path)
 signal pattern_removed(path)
@@ -10,6 +12,7 @@ onready var _margin_spin_box : SpinBox = get_node("VBoxContainer/MarginContainer
 
 var _file_dialog = null
 var _preview_provider : EditorResourcePreview = null
+var _logger = Logger.get_for(self)
 
 
 func setup_dialogs(base_control):
@@ -61,7 +64,7 @@ func _on_EditorResourcePreview_preview_loaded(path, texture, userdata):
 	if texture != null:
 		_item_list.set_item_icon(i, texture)
 	else:
-		print("No preview available for ", path)
+		_logger.debug(str("No preview available for ", path))
 
 
 func _on_EditorResourcePreview_preview_invalidated(path):

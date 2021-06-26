@@ -1,3 +1,4 @@
+tool
 
 static func get_scene_aabb(node, aabb=AABB()):
 	if not node.visible:
