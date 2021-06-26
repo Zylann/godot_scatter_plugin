@@ -2,7 +2,7 @@ tool
 extends EditorPlugin
 
 const Scatter3D = preload("res://addons/zylann.scatter/scatter3d.gd")
-const PaletteControl = preload("res://addons/zylann.scatter/tools/palette.tscn")
+const PaletteScene = preload("res://addons/zylann.scatter/tools/palette.tscn")
 const Util = preload("res://addons/zylann.scatter/tools/util.gd")
 
 const ACTION_PAINT = 0
@@ -37,7 +37,7 @@ func _enter_tree():
 	
 	var base_control = get_editor_interface().get_base_control()
 	
-	_palette = PaletteControl.instance()
+	_palette = PaletteScene.instance()
 	_palette.connect("patterns_selected", self, "_on_Palette_patterns_selected")
 	_palette.connect("pattern_added", self, "_on_Palette_pattern_added")
 	_palette.connect("pattern_removed", self, "_on_Palette_pattern_removed")
