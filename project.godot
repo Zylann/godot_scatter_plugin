@@ -15,8 +15,8 @@ _global_script_class_icons={
 
 [application]
 
-config/name="New Game Project"
-config/icon="res://icon.png"
+config/name="Scatter plugin"
+config/icon="res://addons/zylann.scatter/tools/icons/icon_scatter3d_node.svg"
 
 [rendering]
 
