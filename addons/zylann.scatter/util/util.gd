@@ -1,16 +1,21 @@
 tool
 
-static func get_scene_aabb(node, aabb=AABB()):
+static func get_scene_aabb(node, aabb=AABB(), parent_transform=Transform()):
 	if not node.visible:
 		return aabb
+	var gtrans := Transform()
+	if node is Spatial:
+		# We cannot use `global_transform` because the node might not be in the scene tree.
+		# If we still use it, Godot will print warnings.
+		gtrans = parent_transform * node.transform
 	if node is VisualInstance:
-		var node_aabb = node.global_transform.xform(node.get_aabb())
+		var node_aabb = gtrans.xform(node.get_aabb())
 		if aabb == AABB():
 			aabb = node_aabb
 		else:
 			aabb = aabb.merge(node_aabb)
 	for i in node.get_child_count():
-		aabb = get_scene_aabb(node.get_child(i), aabb)
+		aabb = get_scene_aabb(node.get_child(i), aabb, gtrans)
 	return aabb
 
 
