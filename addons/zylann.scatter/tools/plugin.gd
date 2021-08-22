@@ -119,7 +119,14 @@ func forward_spatial_gui_input(p_camera, p_event):
 	
 	elif p_event is InputEventMouseMotion:
 		var mm = p_event
-		_mouse_position = mm.position
+		var mouse_position = mm.position
+
+		# Need to do an extra conversion in case the editor viewport is in half-resolution mode
+		var viewport = p_camera.get_viewport()
+		var viewport_container = viewport.get_parent()
+		var screen_position = mouse_position * viewport.size / viewport_container.rect_size
+
+		_mouse_position = screen_position
 		# Trigger action only if these buttons are held
 		_cmd_pending_action = mm.button_mask & (BUTTON_MASK_LEFT | BUTTON_MASK_RIGHT)
 
