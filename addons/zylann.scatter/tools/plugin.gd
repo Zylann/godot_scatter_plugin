@@ -320,8 +320,8 @@ func _on_Palette_pattern_added(path):
 	# TODO Duh, may not work if the file was moved or renamed... I'm tired of this
 	var ur = get_undo_redo()
 	ur.create_action("Add scatter pattern")
-	ur.add_do_method(self, "add_pattern", path)
-	ur.add_undo_method(self, "remove_pattern", path)
+	ur.add_do_method(self, "_add_pattern", path)
+	ur.add_undo_method(self, "_remove_pattern", path)
 	ur.commit_action()
 
 
@@ -329,8 +329,8 @@ func _on_Palette_patterns_removed(paths):
 	var ur = get_undo_redo()
 	ur.create_action("Remove scatter pattern")
 	for path in paths:
-		ur.add_do_method(self, "remove_pattern", path)
-		ur.add_undo_method(self, "add_pattern", path)
+		ur.add_do_method(self, "_remove_pattern", path)
+		ur.add_undo_method(self, "_add_pattern", path)
 	ur.commit_action()
 
 
