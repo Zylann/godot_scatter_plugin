@@ -9,10 +9,10 @@ signal patterns_removed(path)
 
 onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
 onready var _margin_spin_box : SpinBox = get_node("VBoxContainer/MarginContainer/MarginSpinBox")
-onready var _min_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxContainer/SizeMinSpinBox")
-onready var _max_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxContainer/SizeMaxSpinBox")
+onready var _min_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMinSpinBox")
+onready var _max_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMaxSpinBox")
 onready var _alignToGround_check_box : CheckBox = get_node("VBoxContainer/AlignVarContainer/AlignToGroundCheckbox")
-onready var _randomizeSize_check_box : CheckBox = get_node("VBoxContainer/SizeVarContainer/HBoxContainer2/RandomizeSizeCheckbox")
+onready var _randomizeSize_check_box : CheckBox = get_node("VBoxContainer/SizeVarContainer/HBoxToggleRandom/RandomizeSizeCheckbox")
 
 var _file_dialog = null
 var _preview_provider : EditorResourcePreview = null
