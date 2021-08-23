@@ -76,17 +76,17 @@ margin_top = 512.0
 margin_right = 202.0
 margin_bottom = 564.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
+[node name="HBoxToggleRandom" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
 margin_right = 202.0
 margin_bottom = 24.0
 
-[node name="SizeVarLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxContainer2"]
+[node name="SizeVarLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxToggleRandom"]
 margin_top = 5.0
 margin_right = 141.0
 margin_bottom = 19.0
 text = "  Size variation (%):     "
 
-[node name="RandomizeSizeCheckbox" type="CheckBox" parent="VBoxContainer/SizeVarContainer/HBoxContainer2"]
+[node name="RandomizeSizeCheckbox" type="CheckBox" parent="VBoxContainer/SizeVarContainer/HBoxToggleRandom"]
 margin_left = 145.0
 margin_right = 169.0
 margin_bottom = 24.0
@@ -94,18 +94,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
+[node name="HBoxRangeRandom" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
 margin_top = 28.0
 margin_right = 202.0
 margin_bottom = 52.0
 
-[node name="MinSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxContainer"]
+[node name="MinSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
 margin_top = 5.0
 margin_right = 4.0
 margin_bottom = 19.0
 text = " "
 
-[node name="SizeMinSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxContainer"]
+[node name="SizeMinSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
 margin_left = 8.0
 margin_right = 82.0
 margin_bottom = 24.0
@@ -116,14 +116,14 @@ allow_greater = true
 align = 2
 suffix = "%"
 
-[node name="MaxSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxContainer"]
+[node name="MaxSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
 margin_left = 86.0
 margin_top = 5.0
 margin_right = 103.0
 margin_bottom = 19.0
 text = "to:"
 
-[node name="SizeMaxSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxContainer"]
+[node name="SizeMaxSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
 margin_left = 107.0
 margin_right = 181.0
 margin_bottom = 24.0
@@ -153,5 +153,5 @@ margin_bottom = 24.0
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_AddButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_RemoveButton_pressed"]
 [connection signal="multi_selected" from="VBoxContainer/ItemList" to="." method="_on_ItemList_multi_selected"]
-[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxContainer/SizeMinSpinBox" to="." method="_on_SizeMinSpinBox_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxContainer/SizeMaxSpinBox" to="." method="_on_SizeMaxSpinBox_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMinSpinBox" to="." method="_on_SizeMinSpinBox_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMaxSpinBox" to="." method="_on_SizeMaxSpinBox_value_changed"]
