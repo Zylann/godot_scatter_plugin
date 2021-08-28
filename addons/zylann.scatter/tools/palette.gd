@@ -136,7 +136,6 @@ func get_configured_size_range() -> Array:
 	size_range[0] = float(_min_size_spin_box.value)/100
 	size_range[1] = float(_max_size_spin_box.value)/100
 	size_range.sort()
-	print(size_range)
 	return size_range
 	
 func get_align_to_normal() -> bool:
