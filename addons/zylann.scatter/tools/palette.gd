@@ -9,6 +9,10 @@ signal patterns_removed(path)
 
 onready var _item_list : ItemList = get_node("VBoxContainer/ItemList")
 onready var _margin_spin_box : SpinBox = get_node("VBoxContainer/MarginContainer/MarginSpinBox")
+onready var _min_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMinSpinBox")
+onready var _max_size_spin_box : SpinBox = get_node("VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMaxSpinBox")
+onready var _alignToGround_check_box : CheckBox = get_node("VBoxContainer/AlignVarContainer/AlignToGroundCheckbox")
+onready var _randomizeSize_check_box : CheckBox = get_node("VBoxContainer/SizeVarContainer/HBoxToggleRandom/RandomizeSizeCheckbox")
 
 var _file_dialog = null
 var _preview_provider : EditorResourcePreview = null
@@ -126,3 +130,26 @@ func can_drop_data(position, data):
 func drop_data(position, data):
 	for file in data.files:
 		emit_signal("pattern_added", file)
+
+func get_configured_size_range() -> Array:
+	var size_range : Array = [1.0,1.0]
+	size_range[0] = float(_min_size_spin_box.value)/100
+	size_range[1] = float(_max_size_spin_box.value)/100
+	size_range.sort()
+	return size_range
+	
+func get_align_to_normal() -> bool:
+	return _alignToGround_check_box.pressed
+
+func get_randomize_size() -> bool:
+	return _randomizeSize_check_box.pressed
+
+#Make sure  Max-Value gets greater/equal Min-Value if needed
+func _on_SizeMinSpinBox_value_changed(value: float) -> void:
+	if _min_size_spin_box.value > _max_size_spin_box.value:
+		_max_size_spin_box.value = _min_size_spin_box.value
+
+#Make sure  Min-Value gets smaller/equal Max-Value if needed
+func _on_SizeMaxSpinBox_value_changed(value: float) -> void:
+	if _max_size_spin_box.value < _min_size_spin_box.value:
+		_min_size_spin_box.value = _max_size_spin_box.value

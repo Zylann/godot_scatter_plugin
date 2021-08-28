@@ -192,6 +192,16 @@ func _paint(ray_origin: Vector3, ray_end: Vector3):
 			_node.add_child(instance)
 			instance.owner = get_editor_interface().get_edited_scene_root()
 			_placed_instances.append(instance)
+			
+			if _palette.get_align_to_normal():
+				var hit_normal = hit.normal.normalized()
+				var xform = Util.align_with_y(instance.global_transform, hit_normal)
+				instance.global_transform = xform
+			
+			if _palette.get_randomize_size():
+				var size_range = _palette.get_configured_size_range()
+				var rand_scale = rand_range(size_range[0],size_range[1])
+				instance.scale = Vector3(rand_scale,rand_scale,rand_scale)
 
 
 func _erase(ray_origin: Vector3, ray_dir: Vector3):

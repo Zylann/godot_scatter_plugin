@@ -42,3 +42,9 @@ static func is_self_or_parent_scene(fpath, node):
 	return false
 
 
+static func align_with_y(xform, new_y) -> Transform:
+	xform.basis.y = new_y
+	xform.basis.x = -xform.basis.z.cross(new_y)
+	xform.basis = xform.basis.orthonormalized()
+	return xform
+

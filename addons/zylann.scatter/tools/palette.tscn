@@ -42,35 +42,116 @@ text = "Remove"
 [node name="ItemList" type="ItemList" parent="VBoxContainer"]
 margin_top = 24.0
 margin_right = 202.0
-margin_bottom = 564.0
+margin_bottom = 480.0
+size_flags_horizontal = 3
 size_flags_vertical = 3
 select_mode = 1
 
 [node name="MarginContainer" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 568.0
+margin_top = 484.0
 margin_right = 202.0
-margin_bottom = 592.0
+margin_bottom = 508.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="MarginLabel" type="Label" parent="VBoxContainer/MarginContainer"]
 margin_top = 5.0
-margin_right = 99.0
+margin_right = 124.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 text = "Object margin:"
 align = 1
 
 [node name="MarginSpinBox" type="SpinBox" parent="VBoxContainer/MarginContainer"]
-margin_left = 103.0
+margin_left = 128.0
 margin_right = 202.0
 margin_bottom = 24.0
-size_flags_horizontal = 3
 max_value = 10.0
 step = 0.01
 allow_greater = true
 
+[node name="SizeVarContainer" type="VBoxContainer" parent="VBoxContainer"]
+margin_top = 512.0
+margin_right = 202.0
+margin_bottom = 564.0
+
+[node name="HBoxToggleRandom" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
+margin_right = 202.0
+margin_bottom = 24.0
+
+[node name="SizeVarLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxToggleRandom"]
+margin_top = 5.0
+margin_right = 141.0
+margin_bottom = 19.0
+text = "  Size variation (%):     "
+
+[node name="RandomizeSizeCheckbox" type="CheckBox" parent="VBoxContainer/SizeVarContainer/HBoxToggleRandom"]
+margin_left = 145.0
+margin_right = 169.0
+margin_bottom = 24.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxRangeRandom" type="HBoxContainer" parent="VBoxContainer/SizeVarContainer"]
+margin_top = 28.0
+margin_right = 202.0
+margin_bottom = 52.0
+
+[node name="MinSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
+margin_top = 5.0
+margin_right = 4.0
+margin_bottom = 19.0
+text = " "
+
+[node name="SizeMinSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
+margin_left = 8.0
+margin_right = 82.0
+margin_bottom = 24.0
+min_value = 10.0
+max_value = 200.0
+value = 100.0
+allow_greater = true
+align = 2
+suffix = "%"
+
+[node name="MaxSizeLabel" type="Label" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
+margin_left = 86.0
+margin_top = 5.0
+margin_right = 103.0
+margin_bottom = 19.0
+text = "to:"
+
+[node name="SizeMaxSpinBox" type="SpinBox" parent="VBoxContainer/SizeVarContainer/HBoxRangeRandom"]
+margin_left = 107.0
+margin_right = 181.0
+margin_bottom = 24.0
+min_value = 10.0
+max_value = 200.0
+value = 100.0
+allow_greater = true
+align = 2
+suffix = "%"
+
+[node name="AlignVarContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 568.0
+margin_right = 202.0
+margin_bottom = 592.0
+
+[node name="AlignToGroundLabel" type="Label" parent="VBoxContainer/AlignVarContainer"]
+margin_top = 5.0
+margin_right = 141.0
+margin_bottom = 19.0
+text = "  Align to ground:        "
+
+[node name="AlignToGroundCheckbox" type="CheckBox" parent="VBoxContainer/AlignVarContainer"]
+margin_left = 145.0
+margin_right = 169.0
+margin_bottom = 24.0
+
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/AddButton" to="." method="_on_AddButton_pressed"]
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveButton" to="." method="_on_RemoveButton_pressed"]
 [connection signal="multi_selected" from="VBoxContainer/ItemList" to="." method="_on_ItemList_multi_selected"]
+[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMinSpinBox" to="." method="_on_SizeMinSpinBox_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/SizeVarContainer/HBoxRangeRandom/SizeMaxSpinBox" to="." method="_on_SizeMaxSpinBox_value_changed"]
